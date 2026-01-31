@@ -96,6 +96,9 @@
         Blunt: 10
   - type: SingularityDistortion
     intensity: 0
+  - type: ContentEye
+    maxZoom: 1.5,1.5
+    zoom: 1.5,1.5
 
 
 - type: entity
