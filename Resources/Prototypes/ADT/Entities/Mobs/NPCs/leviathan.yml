@@ -99,6 +99,21 @@
   - type: ContentEye
     maxZoom: 1.5,1.5
     zoom: 1.5,1.5
+  - type: SolutionContainerManager
+  - type: InjectableSolution
+    solution: chemicals
+  - type: Bloodstream
+    maxBleedAmount: 5
+    bloodRefreshAmount: 300
+    bleedReductionAmount: 2
+    bloodMaxVolume: 5000
+    bloodReagent: ADTCursedBlood
+    bloodlossDamage:
+      types:
+        Bloodloss: 0
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
 
 
 - type: entity
@@ -118,9 +133,20 @@
     tags:
     - HideContextMenu
   - type: Physics
-    canCollide: false
+    #canCollide: false
   - type: SingularityDistortion
     intensity: 0
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 1.7
+        density: 137992
+        mask:
+        - FlyingMobMask
+        layer:
+        - FlyingMobLayer
 
 - type: entity
   id: ADTSpaceLeviathanDespawn
