@@ -13,6 +13,8 @@ using Content.Shared.ADT.CCVar;
 using Content.Server.ADT.MobCaller;
 using System.Linq;
 using Robust.Shared.Spawners;
+using Content.Shared.Movement.Components;
+using Content.Shared.Movement.Systems;
 
 namespace Content.Server.ADT.SpaceWhale.StationProximity;
 
@@ -23,6 +25,7 @@ public sealed class StationProximitySystem : EntitySystem
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly AudioSystem _audio = default!;
     [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] private readonly MovementSpeedModifierSystem _moveSpeed = default!;
 
     private const float CheckInterval = 60;
     private TimeSpan _nextCheck = TimeSpan.Zero;
@@ -44,7 +47,7 @@ public sealed class StationProximitySystem : EntitySystem
         if (args.NewMobState == MobState.Alive)
             return;
 
-        StopFollowing(ent.Owner);
+        RemComp<SpaceWhaleTargetComponent>(ent.Owner);
     }
 
     private void OnTargetShutdown(Entity<SpaceWhaleTargetComponent> ent, ref ComponentShutdown args)
@@ -60,11 +63,14 @@ public sealed class StationProximitySystem : EntitySystem
         if (TryComp<MobCallerComponent>(ent.Comp.MobCaller, out var caller))
         {
             foreach (var item in caller.SpawnedEntities)
-                EnsureComp<TimedDespawnComponent>(item).Lifetime = 20f;
+            {
+                EnsureComp<TimedDespawnComponent>(item).Lifetime = 15f;
+                _moveSpeed.ChangeBaseSpeed(item, 11, 30, 1);
+                _moveSpeed.RefreshMovementSpeedModifiers(item);
+            }
         }
 
         QueueDel(ent.Comp.MobCaller);
-        RemComp<SpaceWhaleTargetComponent>(ent.Owner);
         _spawned = false;
     }
 
@@ -142,7 +148,7 @@ public sealed class StationProximitySystem : EntitySystem
     {
         if (humanoidTransform.GridUid.HasValue && stations.TryGetValue(humanoidTransform.GridUid.Value, out _))
         {
-            StopFollowing(humanoid);
+            RemComp<SpaceWhaleTargetComponent>(humanoid);
             return;
         }
 
@@ -166,8 +172,8 @@ public sealed class StationProximitySystem : EntitySystem
             closestDistance = Math.Min(closestDistance, distance);
         }
 
-        if (closestDistance <= _cfg.GetCVar(ADTCCVars.SpaceWhaleSpawnDistance))
-            StopFollowing(humanoid);
+        if (closestDistance <= _cfg.GetCVar(ADTCCVars.SpaceWhaleSpawnDistance) && HasComp<SpaceWhaleTargetComponent>(humanoid))
+            RemComp<SpaceWhaleTargetComponent>(humanoid);
         else
             HandleFarFromStation(humanoid);
     }
