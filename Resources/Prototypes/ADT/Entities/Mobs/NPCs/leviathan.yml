@@ -10,7 +10,7 @@
     spacing: 1
     prototype: ADTSpaceWhaleSegment
   - type: MovementSpeedModifier
-    baseSprintSpeed: 55
+    baseSprintSpeed: 40
     baseWalkSpeed: 11
     baseWeightlessFriction: 4
     weightlessFriction: 4
