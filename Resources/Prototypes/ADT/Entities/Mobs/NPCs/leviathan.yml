@@ -63,6 +63,7 @@
     sprite: ADT/Mobs/Aliens/leviathan.rsi
     state: head
     noRot: false
+    drawDepth: Overdoors
   # - type: NightVision # Goobstation - Nigthvision
     # color: "#808080"
     # activateSound: null
@@ -129,6 +130,7 @@
     sprite: ADT/Mobs/Aliens/leviathan.rsi
     state: segment
     noRot: false
+    drawDepth: Overdoors
   - type: Tag
     tags:
     - HideContextMenu
