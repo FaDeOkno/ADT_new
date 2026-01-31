@@ -7,12 +7,14 @@
   components:
   - type: TailedEntity
     amount: 65
-    speed: 13
     spacing: 1
     prototype: ADTSpaceWhaleSegment
   - type: MovementSpeedModifier
-    baseSprintSpeed: 11
+    baseSprintSpeed: 55
     baseWalkSpeed: 11
+    baseWeightlessFriction: 4
+    weightlessFriction: 4
+    weightlessFrictionNoInput: 4
   # - type: RadarBlip
   #   scale: 3
   #   shape: hexagon
@@ -34,7 +36,7 @@
       fix1:
         shape:
           !type:PhysShapeCircle
-          radius: 2
+          radius: 0.7
         density: 137992
         mask:
         - FlyingMobMask
@@ -95,11 +97,14 @@
       types:
         Structural: 5000
         Blunt: 10
+    ignoreWhitelist:
+      components:
+      - ContainmentField
   - type: SingularityDistortion
     intensity: 0
   - type: ContentEye
     maxZoom: 1.5,1.5
-    zoom: 1.5,1.5
+    targetZoom: 1.5,1.5
   - type: SolutionContainerManager
   - type: InjectableSolution
     solution: chemicals
