@@ -172,8 +172,8 @@ public sealed class StationProximitySystem : EntitySystem
             closestDistance = Math.Min(closestDistance, distance);
         }
 
-        if (closestDistance <= _cfg.GetCVar(ADTCCVars.SpaceWhaleSpawnDistance) && HasComp<SpaceWhaleTargetComponent>(humanoid))
-            RemComp<SpaceWhaleTargetComponent>(humanoid);
+        if (closestDistance <= _cfg.GetCVar(ADTCCVars.SpaceWhaleSpawnDistance))
+            RemCompDeferred<SpaceWhaleTargetComponent>(humanoid);
         else
             HandleFarFromStation(humanoid);
     }
