@@ -27,7 +27,7 @@ public sealed partial class MirrorOverlay : Overlay
     private TransformSystem _transform = default!;
     private ContainerSystem _container = default!;
 
-    public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
+    public override OverlaySpace Space => OverlaySpace.WorldSpaceEntities;
 
     public MirrorOverlay()
     {
