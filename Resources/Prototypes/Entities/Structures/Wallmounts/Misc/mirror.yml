@@ -37,7 +37,7 @@
           collection: MetalGlassBreak
   # ADT-Tweak-start
   - type: Mirror
-    reflectionOffset: 0.3
+    reflectionOffset: 0.35
     toleratedDistance: 1.2
   # ADT-Tweak-end
 
