@@ -172,7 +172,7 @@ public sealed partial class MirrorOverlay : Overlay
         var dist = (_transform.GetWorldPosition(uid) - mirrorPos).Length();
 
         var fadeFactor = MathF.Max(dist - toleratedDistance, 0f);
-        return originalColor.WithAlpha(Math.Clamp(originalColor.A - fadeFactor * fadeFactorMod, 0f, 1f));
+        return originalColor.WithAlpha(Math.Clamp(originalColor.A - fadeFactor * fadeFactorMod, 0f, 0.9f));
     }
 
     protected override void DisposeBehavior()
