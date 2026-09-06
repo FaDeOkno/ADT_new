@@ -105,12 +105,12 @@ public sealed partial class MirrorOverlay : Overlay
                                 (MirrorComponent Component, Vector2 Position, Angle Rotation) mirrorData)
     {
         var entities = _entityManager.AllEntityQueryEnumerator<MirrorReflectionComponent, SpriteComponent, TransformComponent>();
-        while (entities.MoveNext(out var uid, out _, out var sprite, out var transform))
+        while (entities.MoveNext(out var uid, out var reflection, out var sprite, out var transform))
         {
             if (_entityManager.HasComponent<MirrorComponent>(uid) || transform.MapID != mapId)
                 continue;
 
-            if (_entityManager.HasComponent<StealthComponent>(uid))
+            if (!reflection.ReflectIfInvisible && _entityManager.HasComponent<StealthComponent>(uid))
                 continue;
 
             var (mirror, mirrorPosition, mirrorRotation) = mirrorData;
