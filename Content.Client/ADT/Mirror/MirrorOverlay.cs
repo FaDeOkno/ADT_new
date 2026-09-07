@@ -110,7 +110,10 @@ public sealed partial class MirrorOverlay : Overlay
             if (_entityManager.HasComponent<MirrorComponent>(uid) || transform.MapID != mapId)
                 continue;
 
-            if (!reflection.ReflectIfInvisible && _entityManager.HasComponent<StealthComponent>(uid))
+            if (!reflection.Active)
+                continue;
+
+            if (!reflection.ReflectIfInvisible && _entityManager.TryGetComponent<StealthComponent>(uid, out var stealth) && stealth.Enabled)
                 continue;
 
             var (mirror, mirrorPosition, mirrorRotation) = mirrorData;
