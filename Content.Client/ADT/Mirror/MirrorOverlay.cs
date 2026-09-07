@@ -138,8 +138,27 @@ public sealed partial class MirrorOverlay : Overlay
             var reflectedPosition = offsetSourcePosition - 2f * Vector2.Dot(offsetSourcePosition - mirrorPosition, normal) * normal;
             var reflectedFacing = normalAngle * 2f - _transform.GetWorldRotation(transform);
 
+            var dir = (reflectedFacing + eye.Rotation).GetCardinalDir();
+            var scale = sprite.Scale;
+
+            switch (dir)
+            {
+                case Direction.West:
+                    dir = Direction.East;
+                    break;
+                case Direction.East:
+                    dir = Direction.West;
+                    break;
+                default:
+                    break;
+            }
+
+            _sprite.SetScale(uid, new Vector2(-scale.X, scale.Y));
+
             _sprite.RenderSprite((uid, sprite), worldHandle, eye.Rotation, reflectedFacing,
-                reflectedPosition - normal * mirror.ReflectionOffset);
+                reflectedPosition - normal * mirror.ReflectionOffset, dir);
+
+            _sprite.SetScale(uid, scale);
 
             foreach (var (layer, visible) in hiddenStencilLayers)
                 layer.Visible = visible;
@@ -147,6 +166,11 @@ public sealed partial class MirrorOverlay : Overlay
             worldHandle.UseShader(_prototypeManager.Index(StencilEqualDrawShader).Instance());
             _sprite.SetColor(uid, color);
         }
+    }
+
+    private void RenderEntity()
+    {
+
     }
 
     private bool CanReflect(EntityUid uid, MirrorReflectionComponent reflection, TransformComponent transform,
