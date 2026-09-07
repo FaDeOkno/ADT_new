@@ -6,10 +6,8 @@ using Robust.Client.Graphics;
 using Robust.Shared.Enums;
 using Robust.Shared.Graphics;
 using Robust.Shared.Map;
-using Robust.Shared.Physics;
 using Robust.Shared.Prototypes;
 using DrawDepth = Content.Shared.DrawDepth.DrawDepth;
-using static Robust.Client.GameObjects.SpriteComponent;
 using Content.Shared.Stealth.Components;
 
 namespace Content.Client.ADT.Mirror;
@@ -107,40 +105,17 @@ public sealed partial class MirrorOverlay : Overlay
         var entities = _entityManager.AllEntityQueryEnumerator<MirrorReflectionComponent, SpriteComponent, TransformComponent>();
         while (entities.MoveNext(out var uid, out var reflection, out var sprite, out var transform))
         {
-            if (_entityManager.HasComponent<MirrorComponent>(uid) || transform.MapID != mapId)
-                continue;
-
-            if (!reflection.Active)
-                continue;
-
-            if (!reflection.ReflectIfInvisible && _entityManager.TryGetComponent<StealthComponent>(uid, out var stealth) && stealth.Enabled)
-                continue;
-
             var (mirror, mirrorPosition, mirrorRotation) = mirrorData;
             var sourcePosition = _transform.GetWorldPosition(transform);
-            if (!worldAabb.Contains(sourcePosition) || _container.IsEntityInContainer(uid))
-                continue;
-
             var normalAngle = mirrorRotation + Angle.FromDegrees(mirror.DirRotation);
             var normal = normalAngle.ToVec().Normalized();
-            var entitySide = Vector2.Dot(sourcePosition - mirrorPosition, normal);
-            var viewerSide = Vector2.Dot(eye.Position.Position - mirrorPosition, normal);
-            if (entitySide * viewerSide <= 0f)
-                continue;
 
-            if (mirror.FadeFactor > 0 &&
-                Vector2.Distance(sourcePosition, mirrorPosition) >= mirror.GatherOffset + 1f / mirror.FadeFactor)
-            {
+            if (!CanReflect(uid, reflection, transform, mirrorData, normal, mapId, eye, worldAabb))
                 continue;
-            }
 
             var color = sprite.Color;
             var newColor = GetTransparentColor(uid, color, mirrorPosition, mirror.ToleratedDistance, mirror.FadeFactor);
             _sprite.SetColor(uid, newColor);
-
-            var offsetSourcePosition = sourcePosition + normal * mirror.GatherOffset;
-            var reflectedPosition = offsetSourcePosition - 2f * Vector2.Dot(offsetSourcePosition - mirrorPosition, normal) * normal;
-            var reflectedFacing = normalAngle * 2f - _transform.GetWorldRotation(transform);
 
             // Этот ебучий слой ломал вообще всё
             // Не убирайте этот фикс
@@ -159,6 +134,10 @@ public sealed partial class MirrorOverlay : Overlay
                 }
             }
 
+            var offsetSourcePosition = sourcePosition + normal * mirror.GatherOffset;
+            var reflectedPosition = offsetSourcePosition - 2f * Vector2.Dot(offsetSourcePosition - mirrorPosition, normal) * normal;
+            var reflectedFacing = normalAngle * 2f - _transform.GetWorldRotation(transform);
+
             _sprite.RenderSprite((uid, sprite), worldHandle, eye.Rotation, reflectedFacing,
                 reflectedPosition - normal * mirror.ReflectionOffset);
 
@@ -168,6 +147,36 @@ public sealed partial class MirrorOverlay : Overlay
             worldHandle.UseShader(_prototypeManager.Index(StencilEqualDrawShader).Instance());
             _sprite.SetColor(uid, color);
         }
+    }
+
+    private bool CanReflect(EntityUid uid, MirrorReflectionComponent reflection, TransformComponent transform,
+                            (MirrorComponent, Vector2, Angle) mirrorData, Vector2 normal,
+                            MapId mapId, IEye eye, Box2 worldAabb)
+    {
+        if (_entityManager.HasComponent<MirrorComponent>(uid) || transform.MapID != mapId)
+            return false;
+
+        if (!reflection.Active)
+            return false;
+
+        if (!reflection.ReflectIfInvisible && _entityManager.TryGetComponent<StealthComponent>(uid, out var stealth) && stealth.Enabled)
+            return false;
+
+        var sourcePosition = _transform.GetWorldPosition(transform);
+        if (!worldAabb.Contains(sourcePosition) || _container.IsEntityInContainer(uid))
+            return false;
+
+        var (mirror, mirrorPosition, _) = mirrorData;
+
+        var entitySide = Vector2.Dot(sourcePosition - mirrorPosition, normal);
+        var viewerSide = Vector2.Dot(eye.Position.Position - mirrorPosition, normal);
+        if (entitySide * viewerSide <= 0f)
+            return false;
+
+        if (mirror.FadeFactor > 0 && Vector2.Distance(sourcePosition, mirrorPosition) >= mirror.GatherOffset + 1f / mirror.FadeFactor)
+            return false;
+
+        return true;
     }
 
     private Color GetTransparentColor(EntityUid uid, Color originalColor, Vector2 mirrorPos, float toleratedDistance, float fadeFactorMod)
