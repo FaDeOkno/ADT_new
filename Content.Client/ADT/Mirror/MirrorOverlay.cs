@@ -168,11 +168,6 @@ public sealed partial class MirrorOverlay : Overlay
         }
     }
 
-    private void RenderEntity()
-    {
-
-    }
-
     private bool CanReflect(EntityUid uid, MirrorReflectionComponent reflection, TransformComponent transform,
                             (MirrorComponent, Vector2, Angle) mirrorData, Vector2 normal,
                             MapId mapId, IEye eye, Box2 worldAabb)
